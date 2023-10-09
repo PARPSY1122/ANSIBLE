@@ -1,85 +1,83 @@
 ---
-- name: Provisioning a new EC2 instance and security group
+- name: provisoning a new ec2 instace & security group
   hosts: localhost
   connection: local
-  gather_facts: False
+  gather_facts: false
   tags: provisioning
 
   pre_tasks:
 
-    - name: Gather facts
-      setup:
-            
-    - name: Print python version
+    - name: gather facts
+      setup: 
+
+    - name: print phython version
       debug:
-        msg: "Using Python {{ ansible_python_version }}"
-              
-    - name: Install dependencies
-      shell: "/usr/bin/python3.10 -m pip install {{ item }}"
+        msg: "Using Python {{ ansible_python_version}} "
+
+    - name: Install Dependencies
+      shell: "/usr/bin/python3.10 -m pip install {{item}}" 
       loop:
-       - boto3
-       - botocore
+        - boot3
+        - bootcore
 
   vars:
     ansible_python_interpreter: /usr/bin/python3.10
-    keypair: eks
+    keypair: cd
     instance_type: t2.micro
-    image_id: ami-067d1e60475437da2
+    image_id: ami-024e6efaf93d85776
     wait: yes
     group: webserver
     count: 1
-    region: us-east-1
-    security_group: ec2-security-group
-    tag_name:
-      Name: Aj-ec2   
-
+    region: us-east-2
+    security_group: asnible_sg
+    tag_name: docker
+  
   tasks:
-    - name: Create a security group
+    - name: create a security group
       amazon.aws.ec2_group:
-        name: "{{ security_group }}"
-        description: Security Group for webserver Servers
-        region: "{{ region }}"
+        name: "{{security_group}}"
+        description: security group for web server
+        region: "{{region}}"
         rules:
-          - proto: tcp
+          - proto: ssh
             from_port: 22
             to_port: 22
-            cidr_ip: 0.0.0.0/0
+            cider_ip: 0.0.0.0/0
           - proto: tcp
             from_port: 8080
             to_port: 8080
-            cidr_ip: 0.0.0.0/0
+            cidir_ip: 0.0.0.0/0
           - proto: tcp
-            from_port: 3000
-            to_port: 3000
-            cidr_ip: 0.0.0.0/0  
+            from_proto: 8081
+            to_proto: 8081
+            cidir_ip: 0.0.0.0/0
           - proto: tcp
-            from_port: 80
-            to_port: 80
-            cidr_ip: 0.0.0.0/0
+            from_proto: 80
+            to_proto: 80
+            cidir_ip: 0.0.0.0/0
           - proto: tcp
-            from_port: 443
-            to_port: 443
-            cidr_ip: 0.0.0.0/0
-        rules_egress:
-          - proto: all
-            cidr_ip: 0.0.0.0/0   
-      register: basic_firewall
-
-    - name: Launch the new EC2 Instance
-      amazon.aws.ec2_instance:
-        security_group: "{{ security_group }}"
-        instance_type: "{{ instance_type }}"
-        image_id: "{{ image_id }}"
-        wait: "{{ wait }}"
-        region: "{{ region }}"
-        key_name: "{{ keypair }}"
-        count: "{{ count }}"
-        tags: "{{ tag_name }}"
-        user_data: |
-          #!/bin/bash
-          sudo apt update -y
-          sudo apt install docker.io -y
-          sudo systemctl start docker
-          sudo systemctl enable docker
-          sudo docker run -d --name 2048 -p 3000:3000 sevenajay/2048:latest
-      register: ec2
+            from_proto: 443
+            to_proto: 443
+            cidir_ip: 0.0.0.0/0
+          rules_egress:
+            - proto: all
+              cidir_ip: 0.0.0.0/0
+          register: basic_firewall
+        - name: lanch new ec2 instance
+          amazon.aws.ec2_instance:
+            security_group: "{{security_group}}"
+            instance_type: "{{instance_type}}"
+            image_id: "{{image_id}}"
+            wait: "{{wait}}"
+            region: "{{region}}"
+            key_name: "{{keypair}}"
+            count: "{{count}}"
+            tags: "{{tag_name}}"
+            user_data: |
+              #!/bin/bash
+              sudo apt update -y
+              sudo apt install docker.io -y
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              sudo docker run -d --name petstore -p 8081:8081 ajayreddy1122/petstore:latest
+            register: ec2 
