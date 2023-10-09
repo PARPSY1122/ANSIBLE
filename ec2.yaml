@@ -49,8 +49,8 @@
             to_port: 8080
             cidr_ip: 0.0.0.0/0
           - proto: tcp
-            from_port: 8081
-            to_port: 8081
+            from_port: 3000
+            to_port: 3000
             cidr_ip: 0.0.0.0/0  
           - proto: tcp
             from_port: 80
@@ -81,5 +81,5 @@
           sudo apt install docker.io -y
           sudo systemctl start docker
           sudo systemctl enable docker
-          sudo docker run -d --name petstore -p 8081:8081 ajayreddy1122/petstore:latest
+          sudo docker run -d --name petstore -p 3000:3000 ajayreddy1122/petstore:latest
       register: ec2
