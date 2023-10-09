@@ -1,29 +1,29 @@
-pipeline {
+pipeline{
     agent any
     tools{
         ansible 'ansible'
     }
-    stages {
-        stage('cleanws') {
-            steps {
-                cleanWs()
-            }
-        }
-        stage('checkout'){
+    stages{
+        stage('clean workspace'){
             steps{
-                git branch: 'main', url: 'https://github.com/Aj7Ay/ANSIBLE.git'
-            }
+                cleanWs()
+            } 
         }
-        stage('TRIVY FS SCAN') {
-            steps {
+        stage('checkout scm'){
+            steps{
+                git branch: 'main' url:'https://github.com/PARPSY1122/ANSIBLE.git'
+
+            }    
+        }
+        stage('trivy fs scan'){
+            steps{
                 sh "trivy fs . > trivyfs.txt"
             }
-        }    
-        stage('ansible provision') {
-          steps {
-             // To suppress warnings when you execute the playbook    
-             sh "pip install --upgrade requests==2.20.1"
-             ansiblePlaybook playbook: 'ec2.yaml' 
+        }
+        stage("ansible provision"){
+            steps{
+                sh "pip install --upgrade requests==2.20.1"
+                ansiblePlaybook playbook: 'ec2.yaml'
             }
         }
     }
